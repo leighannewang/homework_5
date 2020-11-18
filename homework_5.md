@@ -98,10 +98,13 @@ path_df =
   ) %>% 
   unnest(data) %>% 
   mutate(
-    path = str_replace(path, "data/study/", ""),
-    id = path,
-    id = str_replace(id, ".csv", ""),
-  ) %>% # pivot longer to tidy data
+    path = str_replace(path, "data/study/", "")
+  ) %>% 
+  separate(path, c("arm", "id"), sep = "_") %>% 
+  mutate(
+    id = str_replace(id, ".csv", "")
+    ) %>% 
+# pivot longer to tidy data
   pivot_longer(
     week_1:week_8,
     names_to = "week",
@@ -110,24 +113,24 @@ path_df =
   ) %>% 
   mutate(
     week = as.numeric(week)
-  ) %>% 
-  select(-path)
+  )
 ```
 
 **Create spaghetti plot and comment on group differences**
 
 ``` r
 path_df %>% 
-  ggplot(aes(x = week, y = observation, color = id)) +
-  geom_line()
+  ggplot(aes(x = week, y = observation, group = id, color = arm)) +
+  geom_line() +
+  facet_grid(. ~ arm)
 ```
 
 <img src="homework_5_files/figure-gfm/path_df plot-1.png" width="90%" />
 
 From the plot we can see that the control observation values are lower
-than the experimental group’s observations. Additionally, while the
-control group’s values seem to be stable over the 8 weeks, the
-experimental group’s values seem to be increasing.
+than the experimental group’s observations; while the control group’s
+values seem to be stable over the 8 weeks, the experimental group’s
+values seem to be increasing.
 
 ## Problem 3
 
@@ -225,13 +228,22 @@ sim_results %>%
   ) %>% 
   ungroup() %>% 
   ggplot(aes(x = mu)) +
-  geom_line(aes(y = mean_mu_hat), color = "red") +
-  geom_line(aes(y = mean_mu_hat_reject), color = "green") +
+  geom_line(aes(y = mean_mu_hat, color = "mean_mu_hat"), size = 1) +
+  geom_line(aes(y = mean_mu_hat_reject, color = "mean_mu_hat_reject"), size = 1) +
   labs(
     x = "true mu",
-    y = "mean estimate of mu",
-    title = "Average Estimates of Mu_Hat vs. Average Estimates of Mu_Hat Rejected"
-  )
+    y = "mean estimate of mu value"
+  ) +
+  scale_color_manual(values = c("green", "red"))
 ```
 
 <img src="homework_5_files/figure-gfm/unnamed-chunk-2-1.png" width="90%" />
+
+The average estimate of mu\_hat when null is rejected is approximately
+equal to the true value of mu when mu = 0, 4, 5, 6 because for most
+samples the null hypothesis will be rejected so the average estimate is
+very close to the true value of mu. When mu = 1, 2, 3, the average
+estimate of mu\_hat for rejected null hypotheses is not approximately
+equal because samples with rejected null hypothesis are on the upper
+tail of the distribution so the average estimate is larger than true
+value of mu.
