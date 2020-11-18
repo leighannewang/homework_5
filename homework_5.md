@@ -122,12 +122,54 @@ path_df %>%
   geom_line()
 ```
 
-<img src="homework_5_files/figure-gfm/unnamed-chunk-2-1.png" width="90%" />
+<img src="homework_5_files/figure-gfm/path_df plot-1.png" width="90%" />
 
 From the plot we can see that the control observation values are lower
-than the experimental group’s observations. Although there are
-variations between the different control subjects and experimental
-subjects, overall control observations fall under values 3-4 and under
-while experimental observations are mostly above 2.5.
+than the experimental group’s observations. Additionally, while the
+control group’s values seem to be stable over the 8 weeks, the
+experimental group’s values seem to be increasing.
 
 ## Problem 3
+
+Function that will run a t.test to be used later and tibble with normal
+distribution with sample size of 30, standard deviation of 5
+
+``` r
+sim_test = function(n = 30, mu, sigma = 5) {
+  
+  sim_data = 
+    tibble(
+    x = rnorm(n, mean = mu, sd = sigma)
+  )
+  
+  sim_data %>% 
+    t.test() %>% 
+    broom::tidy()
+  
+}
+```
+
+Running the simulation for mu = 0
+
+``` r
+sim_results = 
+  rerun(5000, sim_test(30, 0, 5)) %>% 
+  bind_rows()
+```
+
+Running simulation for mu = {0, 1, 2, 3, 4, 5, 6}
+
+``` r
+sim_results = 
+  tibble(mu = c(0, 1, 2, 3, 4, 5, 6)) %>% 
+  mutate(
+    output_lists = map(.x = mu, ~rerun(5000, sim_test(mu = .x))),
+    estimate_dfs = map(output_lists, bind_rows)) %>% 
+  select(-output_lists) %>% 
+  unnest(estimate_dfs) %>% 
+  mutate(
+    mu_hat = estimate
+  ) %>% 
+  select(-estimate) %>% 
+  relocate(mu, mu_hat)
+```
