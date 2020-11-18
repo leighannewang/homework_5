@@ -132,7 +132,7 @@ experimental group’s values seem to be increasing.
 ## Problem 3
 
 **Function that will run a t.test to be used later and tibble with
-normal distribution with sample size of 30, standard deviation of 5 **
+normal distribution with sample size of 30, standard deviation of 5**
 
 ``` r
 sim_test = function(n = 30, mu, sigma = 5) {
@@ -206,3 +206,32 @@ likelihood that the null hypothesis will be rejected, meaning that
 higher effect size means more power. The plot shows that as the true
 value of mean increases so does the proportion of times false null
 hypothesis was rejected until about mu = 3 where it plateaus.
+
+**Plot showing average estimate of mu\_hat on y-axis an true mu on
+x-axis and plot of average estimate of mu\_hat where null was rejected
+on y-axis and true value of mu on x-axis**
+
+``` r
+sim_results %>% 
+  group_by(mu) %>%
+  mutate(
+    mean_mu_hat = mean(mu_hat)
+  ) %>% 
+  ungroup %>%   
+  filter(p.value <= 0.05) %>% 
+  group_by(mu) %>% 
+  mutate(
+    mean_mu_hat_reject = mean(mu_hat)
+  ) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = mu)) +
+  geom_line(aes(y = mean_mu_hat), color = "red") +
+  geom_line(aes(y = mean_mu_hat_reject), color = "green") +
+  labs(
+    x = "true mu",
+    y = "mean estimate of mu",
+    title = "Average Estimates of Mu_Hat vs. Average Estimates of Mu_Hat Rejected"
+  )
+```
+
+<img src="homework_5_files/figure-gfm/unnamed-chunk-2-1.png" width="90%" />

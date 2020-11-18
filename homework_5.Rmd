@@ -138,7 +138,7 @@ From the plot we can see that the control observation values are lower than the 
 
 ## Problem 3
 
-**Function that will run a t.test to be used later and tibble with normal distribution with sample size of 30, standard deviation of 5 **
+**Function that will run a t.test to be used later and tibble with normal distribution with sample size of 30, standard deviation of 5**
 
 ```{r, sim_test}
 sim_test = function(n = 30, mu, sigma = 5) {
@@ -206,6 +206,31 @@ sim_results %>%
 
 We can see that as the true value of mu increases, so does the likelihood that the null hypothesis will be rejected, meaning that higher effect size means more power. The plot shows that as the true value of mean increases so does the proportion of times false null hypothesis was rejected until about mu = 3 where it plateaus.
 
+**Plot showing average estimate of mu_hat on y-axis an true mu on x-axis and plot of average estimate of mu_hat where null was rejected on y-axis and true value of mu on x-axis**
+
+```{r}
+sim_results %>% 
+  group_by(mu) %>%
+  mutate(
+    mean_mu_hat = mean(mu_hat)
+  ) %>% 
+  ungroup %>%   
+  filter(p.value <= 0.05) %>% 
+  group_by(mu) %>% 
+  mutate(
+    mean_mu_hat_reject = mean(mu_hat)
+  ) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = mu)) +
+  geom_line(aes(y = mean_mu_hat), color = "red") +
+  geom_line(aes(y = mean_mu_hat_reject), color = "green") +
+  labs(
+    x = "true mu",
+    y = "mean estimate of mu",
+    title = "Average Estimates of Mu_Hat vs. Average Estimates of Mu_Hat Rejected"
+  )
+  
+```
 
 
 
