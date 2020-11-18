@@ -131,8 +131,8 @@ experimental group’s values seem to be increasing.
 
 ## Problem 3
 
-Function that will run a t.test to be used later and tibble with normal
-distribution with sample size of 30, standard deviation of 5
+**Function that will run a t.test to be used later and tibble with
+normal distribution with sample size of 30, standard deviation of 5 **
 
 ``` r
 sim_test = function(n = 30, mu, sigma = 5) {
@@ -149,7 +149,7 @@ sim_test = function(n = 30, mu, sigma = 5) {
 }
 ```
 
-Running the simulation for mu = 0
+**Running the simulation for mu = 0**
 
 ``` r
 sim_results = 
@@ -157,7 +157,7 @@ sim_results =
   bind_rows()
 ```
 
-Running simulation for mu = {0, 1, 2, 3, 4, 5, 6}
+**Running simulation for mu = {0, 1, 2, 3, 4, 5, 6}**
 
 ``` r
 sim_results = 
@@ -173,3 +173,36 @@ sim_results =
   select(-estimate) %>% 
   relocate(mu, mu_hat)
 ```
+
+**Plot showing proportion of times null was rejected on y-axis and true
+value of mu on x-axis**
+
+``` r
+sim_results %>% 
+  mutate(
+    rejected_null = case_when(
+     p.value <= 0.05 ~ "yes",
+     p.value > 0.05 ~ "no" 
+    )
+  ) %>% 
+  group_by(mu, rejected_null) %>% 
+  filter(rejected_null == "yes") %>% 
+  count(rejected_null) %>% 
+  summarize(
+    prop_rejected = sum(n)/5000
+  ) %>% 
+  ggplot(aes(x = mu, y = prop_rejected)) +
+  geom_smooth(se = FALSE) +
+  labs(
+    x = "true mu",
+    y = "proportion of times null rejected"
+  )
+```
+
+<img src="homework_5_files/figure-gfm/plot_prop-1.png" width="90%" />
+
+We can see that as the true value of mu increases, so does the
+likelihood that the null hypothesis will be rejected, meaning that
+higher effect size means more power. The plot shows that as the true
+value of mean increases so does the proportion of times false null
+hypothesis was rejected until about mu = 3 where it plateaus.
