@@ -59,7 +59,7 @@ In this step we are summarizing to obtain number of unsolved and total homicides
 
 **Proportion test for Baltimore, MD:**
 
-```{r, collapse = TRUE}
+```{r, prop.test, collapse = TRUE}
 prop.test(
   aggregate_df %>% filter(city_state == "Baltimore_MD") %>% pull(hom_unsolved), 
   aggregate_df %>% filter(city_state == "Baltimore_MD") %>% pull(hom_total)) %>% 
@@ -68,7 +68,7 @@ prop.test(
 
 **Iterate the proportion test for each city:**
 
-```{r}
+```{r, results_df}
 results_df = 
   aggregate_df %>% 
   mutate(
@@ -82,7 +82,7 @@ results_df =
 
 **Plot:**
 
-```{r}
+```{r, results_df plot}
 results_df %>% 
   mutate(city_state = fct_reorder(city_state, estimate)) %>% 
   ggplot(aes(x = city_state, y = estimate)) +
@@ -90,4 +90,50 @@ results_df %>%
   geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) + 
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
+
+## Problem 2
+
+**Read in all datasets and create tidy dataframe**
+
+```{r, path_df, message = FALSE}
+path_df = 
+  tibble(
+    path = list.files("data/study")
+  ) %>% 
+  mutate(
+    path = str_c("data/study/", path),
+    data = map(.x = path, ~read_csv(.x)) # reading in datasets
+  ) %>% 
+  unnest(data) %>% 
+  mutate(
+    path = str_replace(path, "data/study/", ""),
+    id = path,
+    id = str_replace(id, ".csv", ""),
+  ) %>% # pivot longer to tidy data
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    values_to = "observation",
+    names_prefix = "week_"
+  ) %>% 
+  mutate(
+    week = as.numeric(week)
+  ) %>% 
+  select(-path)
+```
+
+**Create spaghetti plot and comment on group differences**
+
+```{r}
+path_df %>% 
+  ggplot(aes(x = week, y = observation, color = id)) +
+  geom_line()
+```
+
+From the plot we can see that the control observation values are lower than the experimental group's observations. Although there are variations between the different control subjects and experimental subjects, overall control observations fall under values 3-4 and under while experimental observations are mostly above 2.5.
+
+## Problem 3
+
+
+
 

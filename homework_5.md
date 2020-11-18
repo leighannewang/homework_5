@@ -81,4 +81,53 @@ results_df %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))
 ```
 
-<img src="homework_5_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
+<img src="homework_5_files/figure-gfm/results_df plot-1.png" width="90%" />
+
+## Problem 2
+
+**Read in all datasets and create tidy dataframe**
+
+``` r
+path_df = 
+  tibble(
+    path = list.files("data/study")
+  ) %>% 
+  mutate(
+    path = str_c("data/study/", path),
+    data = map(.x = path, ~read_csv(.x)) # reading in datasets
+  ) %>% 
+  unnest(data) %>% 
+  mutate(
+    path = str_replace(path, "data/study/", ""),
+    id = path,
+    id = str_replace(id, ".csv", ""),
+  ) %>% # pivot longer to tidy data
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    values_to = "observation",
+    names_prefix = "week_"
+  ) %>% 
+  mutate(
+    week = as.numeric(week)
+  ) %>% 
+  select(-path)
+```
+
+**Create spaghetti plot and comment on group differences**
+
+``` r
+path_df %>% 
+  ggplot(aes(x = week, y = observation, color = id)) +
+  geom_line()
+```
+
+<img src="homework_5_files/figure-gfm/unnamed-chunk-2-1.png" width="90%" />
+
+From the plot we can see that the control observation values are lower
+than the experimental group’s observations. Although there are
+variations between the different control subjects and experimental
+subjects, overall control observations fall under values 3-4 and under
+while experimental observations are mostly above 2.5.
+
+## Problem 3
